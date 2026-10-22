@@ -32,22 +32,18 @@ export default function Tasks() {
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       const searchText = search.trim().toLowerCase();
-      console.log("SearchText",searchText)
 
       const matchesSearch =
         task.title.toLowerCase().includes(searchText) ||
         task.subject.toLowerCase().includes(searchText);
-        console.log("matchesSearch",matchesSearch)
 
       const matchesStatus =
         statusFilter === "All" ||
         (statusFilter === "Completed" && task.completed) ||
         (statusFilter === "Pending" && !task.completed);
-        console.log("matchesStatus",matchesStatus)
 
       const matchesPriority =
         priorityFilter === "All" || task.priority === priorityFilter;
-        console.log("matchesPriority",matchesPriority)
 
       return matchesSearch && matchesStatus && matchesPriority;
     });
