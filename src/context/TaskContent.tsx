@@ -1,4 +1,3 @@
-
 import {
   createContext,
   useContext,
@@ -19,9 +18,7 @@ type TaskContextType = {
   updateTask: (id: number, newTitle: string) => void;
 };
 
-const TaskContext = createContext<TaskContextType | undefined>(
-  undefined
-);
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 const STORAGE_KEY = "light-study-planner-tasks";
 
@@ -62,11 +59,7 @@ function getInitialTasks(): Task[] {
   return initialTasks;
 }
 
-export function TaskProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function TaskProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>(getInitialTasks);
 
   useEffect(() => {
@@ -90,26 +83,20 @@ export function TaskProvider({
   function toggleTask(id: number) {
     setTasks((previousTasks) =>
       previousTasks.map((task) =>
-        task.id === id
-          ? { ...task, completed: !task.completed }
-          : task
-      )
+        task.id === id ? { ...task, completed: !task.completed } : task,
+      ),
     );
   }
 
   function deleteTask(id: number) {
-    setTasks((previousTasks) =>
-      previousTasks.filter((task) => task.id !== id)
-    );
+    setTasks((previousTasks) => previousTasks.filter((task) => task.id !== id));
   }
 
   function updateTask(id: number, newTitle: string) {
     setTasks((previousTasks) =>
       previousTasks.map((task) =>
-        task.id === id
-          ? { ...task, title: newTitle }
-          : task
-      )
+        task.id === id ? { ...task, title: newTitle } : task,
+      ),
     );
   }
 
@@ -132,9 +119,7 @@ export function useTaskContext() {
   const context = useContext(TaskContext);
 
   if (!context) {
-    throw new Error(
-      "useTaskContext must be used inside TaskProvider"
-    );
+    throw new Error("useTaskContext must be used inside TaskProvider");
   }
 
   return context;
