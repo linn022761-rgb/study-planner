@@ -19,8 +19,6 @@ const NotFoundLazy = lazy(() => import('./pages/NotFound'));
 import Login from './pages/Login';
 
 import { TaskProvider } from './context/TaskContent';
-import { lazy, Suspense } from 'react';
-import Home from './pages/Home';
 
 function Layout() {
 	return (
@@ -38,10 +36,17 @@ function Layout() {
 // Login မဝင်ရသေးရင် Login Page ကို ပို့မယ်
 function RequireAuth() {
 	const location = useLocation();
+	console.log(location);
 	const user = localStorage.getItem('demoUser');
 
 	if (!user) {
-		return <Navigate to="/login" state={{ from: location }} replace />;
+		return (
+			<Navigate
+				to={`/login?from=${location.pathname}`}
+				state={{ from: location }}
+				replace
+			/>
+		);
 	}
 
 	return <Outlet />;
@@ -59,11 +64,11 @@ export default function App() {
 						<Route path="/login" element={<Login />} />
 
 						{/* Login ဝင်ပြီးမှ ဝင်ခွင့်ရှိတဲ့ Pages */}
-						<Route element={<RequireAuth />}>
-							<Route path="/dashboard" element={<DashboardLazy />} />
-							<Route path="/tasks" element={<TasksLazy />} />
-							<Route path="/add-task" element={<AddTaskLazy />} />
-						</Route>
+						{/* <Route element={<RequireAuth />}> */}
+						<Route path="/dashboard" element={<DashboardLazy />} />
+						<Route path="/tasks" element={<TasksLazy />} />
+						<Route path="/add-task" element={<AddTaskLazy />} />
+						{/* </Route> */}
 
 						<Route path="*" element={<NotFoundLazy />} />
 					</Route>
