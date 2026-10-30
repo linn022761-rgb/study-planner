@@ -8,24 +8,29 @@ import {
 } from "react-router-dom";
 
 import Navbar from "@/components/Navbar";
+import { lazy, Suspense } from "react";
 
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import Tasks from "./pages/Tasks";
-import AddTask from "./pages/AddTask";
-import About from "./pages/About";
-import NotFound from "./pages/NotFound";
+const DashboardLazy = lazy(() => import("./pages/Dashboard"));
+const HomeLazy = lazy(() => import("./pages/Home"));
+const TasksLazy = lazy(() => import("./pages/Tasks"));
+const AddTaskLazy = lazy(() => import("./pages/AddTask"));
+const AboutLazy = lazy(() => import("./pages/About"));
+const NotFoundLazy = lazy(() => import("./pages/NotFound"));
 import Login from "./pages/Login";
 
 import { TaskProvider } from "./context/TaskContent";
+import { lazy, Suspense } from "react";
+import Home from "./pages/Home";
 
-// Shared Layout
+
 function Layout() {
   return (
     <>
       <Navbar />
       <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Outlet />
+        <Suspense fallback={<div>loading page...</div>}>
+          <Outlet />
+        </Suspense>
       </main>
     </>
   );
@@ -50,18 +55,18 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             {/* Login မလိုတဲ့ Pages */}
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/" element={<HomeLazy />} />
+            <Route path="/about" element={<AboutLazy />} />
             <Route path="/login" element={<Login />} />
 
             {/* Login ဝင်ပြီးမှ ဝင်ခွင့်ရှိတဲ့ Pages */}
             <Route element={<RequireAuth />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/tasks" element={<Tasks />} />
-              <Route path="/add-task" element={<AddTask />} />
+              <Route path="/dashboard" element={<DashboardLazy />} />
+              <Route path="/tasks" element={<TasksLazy />} />
+              <Route path="/add-task" element={<AddTaskLazy />} />
             </Route>
 
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFoundLazy />} />
           </Route>
         </Routes>
       </TaskProvider>
