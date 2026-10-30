@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 
@@ -82,6 +81,7 @@ export default function TaskCard({
                 aria-label="Edit task title"
               />
 
+
               <Button
                 type="button"
                 size="icon"
@@ -105,9 +105,7 @@ export default function TaskCard({
           ) : (
             <h2
               className={`text-lg font-semibold ${
-                task.completed
-                  ? "text-muted-foreground line-through"
-                  : ""
+                task.completed ? "text-muted-foreground line-through" : ""
               }`}
             >
               {task.title}
