@@ -1,4 +1,4 @@
-import { NavLink, Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const links = [
   { to: "/", label: "Home", end: true },
@@ -12,7 +12,6 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <nav className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-        {/* Brand */}
         <Link
           to="/"
           className="w-fit text-xl font-extrabold tracking-tight text-blue-700"
@@ -23,7 +22,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Navigation links */}
         <div className="flex flex-wrap items-center gap-2">
           {links.map((link) => (
             <NavLink
@@ -43,6 +41,13 @@ export default function Navbar() {
               {link.label}
             </NavLink>
           ))}
+
+          <Link
+            to="/login"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+          >
+            Login
+          </Link>
         </div>
       </nav>
     </header>
