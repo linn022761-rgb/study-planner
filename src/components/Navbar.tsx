@@ -1,11 +1,11 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink } from 'react-router-dom';
 
 const links = [
-  { to: "/", label: "Home", end: true },
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/tasks", label: "My Tasks" },
-  { to: "/add-task", label: "Add Task" },
-  { to: "/about", label: "About" },
+  { to: '/', label: 'Home', end: true },
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/tasks', label: 'My Tasks' },
+  { to: '/add-task', label: 'Add Task' },
+  { to: '/about', label: 'About' },
 ];
 
 export default function Navbar() {
@@ -30,12 +30,12 @@ export default function Navbar() {
               end={link.end}
               className={({ isActive }) =>
                 [
-                  "rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500",
+                  'rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                   isActive
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-600 hover:bg-blue-50 hover:text-blue-700",
-                ].join(" ")
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700',
+                ].join(' ')
               }
             >
               {link.label}
