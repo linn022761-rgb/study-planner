@@ -1,13 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 import { loginUser } from '@/services/authApi';
-import { Input } from '@/components/ui/input';
+import { useAuth } from '@/context/AuthContext';
+
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import TextInput from '@/components/forms/TextInput';
 
 // 1. Zod Validation Schema
 const loginSchema = z.object({
@@ -23,17 +24,15 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { login } = useAuth();
+
   // Remember the page user wanted to visit
   const from =
     (location.state as { from?: { pathname?: string } } | null)?.from
       ?.pathname || '/dashboard';
 
   // 3. React Hook Form
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormValues>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -47,7 +46,7 @@ export default function Login() {
       loginUser(values.email, values.password),
 
     onSuccess: (user) => {
-      localStorage.setItem('demoUser', JSON.stringify(user));
+      login(user);
 
       navigate(from, { replace: true });
     },
@@ -58,6 +57,7 @@ export default function Login() {
     loginMutation.mutate(values);
   };
 
+  // 6. UI
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
@@ -71,55 +71,41 @@ export default function Login() {
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Email */}
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-
-            <Input
-              id="email"
+        <FormProvider {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            {/* Email */}
+            <TextInput
+              label="Email Address"
+              name="email"
               type="email"
               placeholder="Enter your email"
-              {...register('email')}
             />
 
-            {errors.email && (
-              <p className="text-sm text-red-600">{errors.email.message}</p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-
-            <Input
-              id="password"
+            {/* Password */}
+            <TextInput
+              label="Password"
+              name="password"
               type="password"
               placeholder="Enter your password"
-              {...register('password')}
             />
 
-            {errors.password && (
-              <p className="text-sm text-red-600">{errors.password.message}</p>
+            {/* API Error */}
+            {loginMutation.isError && (
+              <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                {loginMutation.error.message}
+              </p>
             )}
-          </div>
 
-          {/* API Error */}
-          {loginMutation.isError && (
-            <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
-              {loginMutation.error.message}
-            </p>
-          )}
-
-          {/* Login Button */}
-          <Button
-            type="submit"
-            disabled={loginMutation.isPending}
-            className="w-full"
-          >
-            {loginMutation.isPending ? 'Logging in...' : 'Login'}
-          </Button>
-        </form>
+            {/* Login Button */}
+            <Button
+              type="submit"
+              disabled={loginMutation.isPending}
+              className="w-full"
+            >
+              {loginMutation.isPending ? 'Logging in...' : 'Login'}
+            </Button>
+          </form>
+        </FormProvider>
 
         {/* Signup Link */}
         <p className="mt-6 text-center text-sm text-gray-500">
