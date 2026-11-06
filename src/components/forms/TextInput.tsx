@@ -10,30 +10,45 @@ interface TextInputProps {
 	min?:string;
 }
 
-const TextInput = ({ label, name, placeholder, type ,min}: TextInputProps) => {
-	const {
-		register,
-		formState: { errors },
-	} = useFormContext();
-	return (
-		<div className="space-y-2">
-			<Label htmlFor={name}>{label}</Label>
-			<Input
-				id={name}
-				type={type}
-				placeholder={placeholder}
-				aria-invalid={!!errors[name]}
-				className="h-12"
-				min={min}
-				{...register(name)}
-			/>
-			{errors[name] && (
-				<p className="text-sm text-destructive">
-					{errors[name]?.message as string}
-				</p>
-			)}
-		</div>
-	);
+const TextInput = ({ label, name, placeholder, type,min }: TextInputProps) => {
+  const {
+    register,
+    clearErrors,
+    formState: { errors },
+  } = useFormContext();
+
+  const registration = register(name);
+
+  return (
+    <div className="space-y-2">
+      {/* Label */}
+      <Label htmlFor={name}>{label}</Label>
+
+      {/* Input */}
+      <Input
+        id={name}
+        type={type}
+		min={min}
+        placeholder={placeholder}
+        aria-invalid={!!errors[name]}
+        className="h-12"
+        {...registration}
+        onChange={(event) => {
+          registration.onChange(event);
+
+          // User ပြန်ရိုက်တဲ့အခါ Error ပျောက်မယ်
+          clearErrors(name);
+        }}
+      />
+
+      {/* Error Message */}
+      {errors[name] && (
+        <p className="text-sm text-destructive">
+          {errors[name]?.message as string}
+        </p>
+      )}
+    </div>
+  );
 };
 
 export default TextInput;

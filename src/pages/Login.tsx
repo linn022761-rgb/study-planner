@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -11,11 +12,9 @@ import { Button } from '@/components/ui/button';
 import TextInput from '@/components/forms/TextInput';
 import { toast } from '@/components/ui/toast';
 
-
-// 1. Zod Validation Schema
+// 1. Validation Schema
 const loginSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address'),
-
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -28,7 +27,7 @@ export default function Login() {
 
   const { login } = useAuth();
 
-  // Remember the page user wanted to visit
+  // Remember previous page
   const from =
     (location.state as { from?: { pathname?: string } } | null)?.from
       ?.pathname || '/dashboard';
@@ -46,18 +45,50 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: (values: LoginFormValues) => loginUser(values),
 
+    // Login Success
     onSuccess: (user) => {
       login(user);
+
+      toast.add({
+        type: 'success',
+        title: 'Login Successful',
+        description: 'Welcome back!',
+        timeout: 3000,
+      });
 
       navigate(from, { replace: true });
     },
 
-    onError: (error) => {
-      console.log(error)
+    // Login Error
+    onError: (error: unknown) => {
+      let message = 'Something went wrong. Please try again.';
+
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+
+        if (!error.response) {
+          message = 'Unable to connect. Please check your internet connection.';
+        } else if (status === 400 || status === 401 || status === 403) {
+          message = 'Email or password is incorrect.';
+        } else if (status === 429) {
+          message = 'Too many attempts. Please try again later.';
+        } else if (status && status >= 500) {
+          message = 'Server error. Please try again later.';
+        }
+      }
+
+      // Password Box ကို အနီရောင်ပြောင်းမယ်
+      form.setError('password', {
+        type: 'server',
+        message,
+      });
+
+      // Toast Notification
       toast.add({
         type: 'error',
-        description: error?.response?.data?.error,
-        timeout: 3000,
+        title: 'Login Failed',
+        description: message,
+        timeout: 4000,
       });
     },
   });
