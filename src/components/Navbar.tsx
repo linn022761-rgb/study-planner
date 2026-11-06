@@ -6,6 +6,7 @@ const links = [
   { to: '/tasks', label: 'My Tasks' },
   { to: '/add-task', label: 'Add Task' },
   { to: '/about', label: 'About' },
+ 
 ];
 
 export default function Navbar() {

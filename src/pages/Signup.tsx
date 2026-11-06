@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 
 import { Button } from '@/components/ui/button';
 import TextInput from '@/components/forms/TextInput';
+import { toast } from '@/components/ui/toast';
 
 const signupSchema = z
   .object({
@@ -40,11 +41,24 @@ export default function Signup() {
 
   const mutation = useMutation({
     mutationFn: (data: SignupData) =>
-      signupUser(data.name, data.email, data.password),
+      signupUser({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      }),
 
     onSuccess: (user) => {
       signup(user);
       navigate('/dashboard');
+    },
+
+    onError: (error) => {
+      console.log( error);
+      toast.add({
+        type: 'error',
+        description: error?.resopnse?.data?.message,
+        timeout: 3000,
+      });
     },
   });
 

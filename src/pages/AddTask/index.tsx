@@ -2,7 +2,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
 
-import { taskSchema, type TaskFormData } from '../Tasks/taskSchema';
+import { taskSchema, type TaskFormData } from './taskSchema';
 import { useTaskContext } from '../../context/TaskContent';
 import { getTodayDateString } from './utils/getTodayDateString';
 import TaskFields from './components/TaskFields';

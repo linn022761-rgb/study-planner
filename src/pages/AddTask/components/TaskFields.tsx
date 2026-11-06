@@ -22,7 +22,7 @@ export default function TaskFields({ minDueDate }: TaskFieldsProps) {
 				name="subject"
 				placeholder="e.g. Web Development"
 			/>
-			<TextInput label="Due Date" name="dueDate" type="date" />
+			<TextInput label="Due Date" name="dueDate" type="date" min={minDueDate}/>
 
 			<SelectInput
 				label="Priority"

@@ -7,9 +7,10 @@ interface TextInputProps {
 	name: string;
 	placeholder?: string;
 	type?: string;
+	min?:string;
 }
 
-const TextInput = ({ label, name, placeholder, type }: TextInputProps) => {
+const TextInput = ({ label, name, placeholder, type ,min}: TextInputProps) => {
 	const {
 		register,
 		formState: { errors },
@@ -23,6 +24,7 @@ const TextInput = ({ label, name, placeholder, type }: TextInputProps) => {
 				placeholder={placeholder}
 				aria-invalid={!!errors[name]}
 				className="h-12"
+				min={min}
 				{...register(name)}
 			/>
 			{errors[name] && (

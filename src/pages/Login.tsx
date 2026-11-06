@@ -9,6 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 
 import { Button } from '@/components/ui/button';
 import TextInput from '@/components/forms/TextInput';
+import { toast } from '@/components/ui/toast';
+
 
 // 1. Zod Validation Schema
 const loginSchema = z.object({
@@ -42,13 +44,21 @@ export default function Login() {
 
   // 4. React Query Mutation
   const loginMutation = useMutation({
-    mutationFn: (values: LoginFormValues) =>
-      loginUser(values.email, values.password),
+    mutationFn: (values: LoginFormValues) => loginUser(values),
 
     onSuccess: (user) => {
       login(user);
 
       navigate(from, { replace: true });
+    },
+
+    onError: (error) => {
+      console.log(error)
+      toast.add({
+        type: 'error',
+        description: error?.response?.data?.error,
+        timeout: 3000,
+      });
     },
   });
 
@@ -88,13 +98,6 @@ export default function Login() {
               type="password"
               placeholder="Enter your password"
             />
-
-            {/* API Error */}
-            {loginMutation.isError && (
-              <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
-                {loginMutation.error.message}
-              </p>
-            )}
 
             {/* Login Button */}
             <Button
