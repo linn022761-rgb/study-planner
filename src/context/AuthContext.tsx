@@ -1,11 +1,16 @@
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-import type { User } from '@/services/authApi';
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+};
 
 type AuthContextType = {
   user: User | null;
-  login: (user: User) => void;
-  signup: (user: User) => void;
+  setToken: (token: string) => void;
+  setUser: (user: User) => void;
   logout: () => void;
 };
 
@@ -18,31 +23,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  const queryClient = useQueryClient();
   // Login
-  function login(user: User) {
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
-  }
-
-  // Signup
-  function signup(user: User) {
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
+  function setToken(token: string) {
+    localStorage.setItem('accessToken', token);
   }
 
   // Logout
   function logout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
     setUser(null);
+    queryClient.invalidateQueries({
+      queryKey: ['userInfo'],
+    });
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        login,
-        signup,
+        setToken,
         logout,
+        setUser,
       }}
     >
       {children}

@@ -7,7 +7,7 @@ export const loginUser = async (payload: {
 }) => {
   const response = await api.post('/auth/login', payload);
 
-  return response.data;
+  return response.data.data.user;
   // User Data ကိုပဲ ပြန်ယူမယ်
   // return response.data.data.user;
 };
@@ -22,4 +22,9 @@ export const signupUser = async (payload: {
 
   //return response.data;
   return response.data.data.user;
+};
+
+export const getUserInfo = async () => {
+  const response = await api.get('/auth/me');
+  return response.data;
 };

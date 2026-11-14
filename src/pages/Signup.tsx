@@ -32,7 +32,7 @@ type SignupData = z.infer<typeof signupSchema>;
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { setToken } = useAuth();
 
   // 2. React Hook Form
   const form = useForm<SignupData>({
@@ -55,8 +55,9 @@ export default function Signup() {
       }),
 
     // Signup Success
-    onSuccess: (user) => {
-      signup(user);
+    onSuccess: (response) => {
+      const token = response.data.accessToken;
+      setToken(token);
 
       toast.add({
         type: 'success',
@@ -70,35 +71,12 @@ export default function Signup() {
 
     // Signup Error
 
-    onError: (error: unknown) => {
-      let message = 'Something went wrong. Please try again.';
-
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-
-        if (!error.response) {
-          message = 'Please check your internet connection.';
-        } else if (status === 409) {
-          message = 'This email is already registered.';
-
-          // Email Box ကို အနီရောင်ပြမယ်
-          form.setError('email', {
-            type: 'server',
-            message,
-          });
-        } else if (status === 400 || status === 422) {
-          message = 'Please check your information and try again.';
-        } else if (status === 429) {
-          message = 'Too many attempts. Please try again later.';
-        } else if (status && status >= 500) {
-          message = 'Server error. Please try again later.';
-        }
-      }
-
+    onError: (error: ResponseData<null>) => {
       toast.add({
         type: 'error',
         title: 'Signup Failed',
-        description: message,
+        description:
+          error.message || 'An error occured during signup. Please try again.',
         timeout: 4000,
       });
     },

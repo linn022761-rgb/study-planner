@@ -25,7 +25,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { login } = useAuth();
+  const { setToken, setUser } = useAuth();
 
   // Remember previous page
   const from =
@@ -46,9 +46,15 @@ export default function Login() {
     mutationFn: (values: LoginFormValues) => loginUser(values),
 
     // Login Success
-    onSuccess: (user) => {
-      login(user);
+    onSuccess: (response) => {
+      console.log('Response keys:', Object.keys(response ?? {}));
 
+      console.log('Data keys:', Object.keys(response?.data ?? {}));
+
+      console.log('Nested data keys:', Object.keys(response?.data?.data ?? {}));
+      const token = response.data.accessToken;
+      setToken(token);
+      setUser(response.data.user);
       toast.add({
         type: 'success',
         title: 'Login Successful',
@@ -60,34 +66,14 @@ export default function Login() {
     },
 
     // Login Error
-    onError: (error: unknown) => {
-      let message = 'Something went wrong. Please try again.';
-
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
-
-        if (!error.response) {
-          message = 'Unable to connect. Please check your internet connection.';
-        } else if (status === 400 || status === 401 || status === 403) {
-          message = 'Email or password is incorrect.';
-        } else if (status === 429) {
-          message = 'Too many attempts. Please try again later.';
-        } else if (status && status >= 500) {
-          message = 'Server error. Please try again later.';
-        }
-      }
-
-      // Password Box ကို အနီရောင်ပြောင်းမယ်
-      form.setError('password', {
-        type: 'server',
-        message,
-      });
+    onError: (error: ResponseData<null>) => {
+      console.log('Login Error:', error);
 
       // Toast Notification
       toast.add({
         type: 'error',
         title: 'Login Failed',
-        description: message,
+        description: error.message,
         timeout: 4000,
       });
     },
