@@ -1,61 +1,61 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useState, type ReactNode } from 'react';
 
-import type { User } from '@/services/authApi';
+export type User = {
+	id: number;
+	name: string;
+	email: string;
+};
 
 type AuthContextType = {
-  user: User | null;
-  login: (user: User) => void;
-  signup: (user: User) => void;
-  logout: () => void;
+	user: User | null;
+	setToken: (token: string) => void;
+	setUser: (user: User) => void;
+	logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const savedUser = localStorage.getItem('user');
+	const [user, setUser] = useState<User | null>(() => {
+		const savedUser = localStorage.getItem('user');
+		return savedUser ? JSON.parse(savedUser) : null;
+	});
 
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+	const queryClient = useQueryClient();
 
-  // Login
-  function login(user: User) {
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
-  }
+	// Login
+	function setToken(token: string) {
+		localStorage.setItem('accessToken', token);
+	}
 
-  // Signup
-  function signup(user: User) {
-    localStorage.setItem('user', JSON.stringify(user));
-    setUser(user);
-  }
+	// Logout
+	function logout() {
+		localStorage.removeItem('accessToken');
+		setUser(null);
+		queryClient.invalidateQueries(['userInfo']); // Invalidate the userInfo query to refetch user data
+	}
 
-  // Logout
-  function logout() {
-    localStorage.removeItem('user');
-    setUser(null);
-  }
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        signup,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+	return (
+		<AuthContext.Provider
+			value={{
+				user,
+				setToken,
+				logout,
+				setUser,
+			}}
+		>
+			{children}
+		</AuthContext.Provider>
+	);
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+	const context = useContext(AuthContext);
 
-  if (!context) {
-    throw new Error('useAuth must be used inside AuthProvider');
-  }
+	if (!context) {
+		throw new Error('useAuth must be used inside AuthProvider');
+	}
 
-  return context;
+	return context;
 }

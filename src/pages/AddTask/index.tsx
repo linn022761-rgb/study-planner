@@ -15,9 +15,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
+import { useMutation } from '@tanstack/react-query';
+import { createTask } from '@/services/taskApi';
+import { toast } from '@/components/ui/toast';
 
 export default function AddTask() {
-	const { addTask } = useTaskContext();
 	const navigate = useNavigate();
 	const minDueDate = getTodayDateString();
 
@@ -31,10 +33,32 @@ export default function AddTask() {
 		},
 	});
 
+	const addTaskMutation = useMutation({
+		mutationKey: ['tasks'],
+		mutationFn: createTask,
+		onSuccess: () => {
+			toast.add({
+				type: 'success',
+				title: 'Tasks Created',
+				description: 'success',
+				timeout: 3000,
+			});
+			method.reset();
+			navigate('/tasks');
+		},
+		onError: (error) => {
+			console.log(error);
+			toast.add({
+				type: 'error',
+				title: 'Errors',
+				description: error?.message,
+				timeout: 3000,
+			});
+		},
+	});
+
 	function onSubmit(data: TaskFormData) {
-		addTask(data);
-		method.reset();
-		navigate('/tasks');
+		addTaskMutation.mutate(data);
 	}
 
 	return (
@@ -71,7 +95,9 @@ export default function AddTask() {
 								>
 									Cancel
 								</Button>
-								<Button type="submit">Create Task</Button>
+								<Button type="submit">
+									{addTaskMutation.isPending ? 'Submitting...' : 'Create Task'}
+								</Button>
 							</div>
 						</form>
 					</FormProvider>

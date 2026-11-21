@@ -12,156 +12,132 @@ import { Button } from '@/components/ui/button';
 import TextInput from '@/components/forms/TextInput';
 import { toast } from '@/components/ui/toast';
 
-
 // 1. Validation Schema
 const signupSchema = z
-  .object({
-    name: z.string().trim().min(2, 'Name must contain at least 2 characters'),
+	.object({
+		name: z.string().trim().min(2, 'Name must contain at least 2 characters'),
 
-    email: z.string().trim().email('Please enter a valid email address'),
+		email: z.string().trim().email('Please enter a valid email address'),
 
-    password: z.string().min(12, 'Password must be at least 12 characters'),
+		password: z.string().min(12, 'Password must be at least 12 characters'),
 
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+		confirmPassword: z.string().min(1, 'Please confirm your password'),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: 'Passwords do not match',
+		path: ['confirmPassword'],
+	});
 
 type SignupData = z.infer<typeof signupSchema>;
 
 export default function Signup() {
-  const navigate = useNavigate();
-  const { signup } = useAuth();
+	const navigate = useNavigate();
+	const { setToken } = useAuth();
 
-  // 2. React Hook Form
-  const form = useForm<SignupData>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
-  });
+	// 2. React Hook Form
+	const form = useForm<SignupData>({
+		resolver: zodResolver(signupSchema),
+		defaultValues: {
+			name: '',
+			email: '',
+			password: '',
+			confirmPassword: '',
+		},
+	});
 
-  // 3. React Query Mutation
-  const mutation = useMutation({
-    mutationFn: (data: SignupData) =>
-      signupUser({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      }),
-      
+	// 3. React Query Mutation
+	const mutation = useMutation({
+		mutationFn: (data: SignupData) =>
+			signupUser({
+				name: data.name,
+				email: data.email,
+				password: data.password,
+			}),
 
-    // Signup Success
-    onSuccess: (user) => {
-      signup(user);
+		// Signup Success
+		onSuccess: (response) => {
+			const token = response.data.accessToken;
+			setToken(token);
 
-      toast.add({
-        type: 'success',
-        title: 'Signup Successful',
-        description: 'Your account has been created successfully.',
-        timeout: 3000,
-      });
+			toast.add({
+				type: 'success',
+				title: 'Signup Successful',
+				description: 'Your account has been created successfully.',
+				timeout: 3000,
+			});
 
-      navigate('/dashboard');
-    },
+			navigate('/dashboard');
+		},
 
-    // Signup Error
+		// Signup Error
 
-    onError: (error: unknown) => {
-      let message = 'Something went wrong. Please try again.';
+		onError: (error: ResponseData<null>) => {
+			toast.add({
+				type: 'error',
+				title: 'Signup Failed',
+				description:
+					error.message || 'An error occurred during signup. Please try again.',
+				timeout: 4000,
+			});
+		},
+	});
 
-      if (axios.isAxiosError(error)) {
-        const status = error.response?.status;
+	// 4. Submit
+	const onSubmit = (data: SignupData) => {
+		mutation.mutate(data);
+	};
 
-        if (!error.response) {
-          message = 'Please check your internet connection.';
-        } else if (status === 409) {
-          message = 'This email is already registered.';
+	// 5. UI
+	return (
+		<div className="mx-auto mt-12 max-w-md rounded-xl border bg-white p-8">
+			<h1 className="mb-6 text-2xl font-bold">Create Account</h1>
 
-          // Email Box ကို အနီရောင်ပြမယ်
-          form.setError('email', {
-            type: 'server',
-            message,
-          });
-        } else if (status === 400 || status === 422) {
-          message = 'Please check your information and try again.';
-        } else if (status === 429) {
-          message = 'Too many attempts. Please try again later.';
-        } else if (status && status >= 500) {
-          message = 'Server error. Please try again later.';
-        }
-      }
+			<FormProvider {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+					<TextInput label="Name" name="name" placeholder="Your name" />
 
-      toast.add({
-        type: 'error',
-        title: 'Signup Failed',
-        description: message,
-        timeout: 4000,
-      });
-    },
-  });
+					<TextInput
+						label="Email"
+						name="email"
+						type="email"
+						placeholder="Email"
+					/>
 
-  // 4. Submit
-  const onSubmit = (data: SignupData) => {
-    mutation.mutate(data);
-  };
+					<TextInput
+						label="Password"
+						name="password"
+						type="password"
+						placeholder="Password"
+					/>
 
-  // 5. UI
-  return (
-    <div className="mx-auto mt-12 max-w-md rounded-xl border bg-white p-8">
-      <h1 className="mb-6 text-2xl font-bold">Create Account</h1>
+					<TextInput
+						label="Confirm Password"
+						name="confirmPassword"
+						type="password"
+						placeholder="Confirm password"
+					/>
 
-      <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <TextInput label="Name" name="name" placeholder="Your name" />
+					<Button
+						type="submit"
+						className="w-full"
+						disabled={mutation.isPending}
+					>
+						{mutation.isPending ? 'Creating Account...' : 'Sign Up'}
+					</Button>
+				</form>
+			</FormProvider>
 
-          <TextInput
-            label="Email"
-            name="email"
-            type="email"
-            placeholder="Email"
-          />
-
-          <TextInput
-            label="Password"
-            name="password"
-            type="password"
-            placeholder="Password"
-          />
-
-          <TextInput
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            placeholder="Confirm password"
-          />
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? 'Creating Account...' : 'Sign Up'}
-          </Button>
-        </form>
-      </FormProvider>
-
-      {/* Login Link */}
-      <p className="mt-5 text-center text-sm">
-        Already have an account?{' '}
-        <button
-          type="button"
-          onClick={() => navigate('/login')}
-          className="font-semibold text-primary hover:underline"
-        >
-          Login
-        </button>
-      </p>
-    </div>
-  );
+			{/* Login Link */}
+			<p className="mt-5 text-center text-sm">
+				Already have an account?{' '}
+				<button
+					type="button"
+					onClick={() => navigate('/login')}
+					className="font-semibold text-primary hover:underline"
+				>
+					Login
+				</button>
+			</p>
+		</div>
+	);
 }
